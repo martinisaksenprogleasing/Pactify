@@ -10,37 +10,25 @@ namespace Pactify.Publishers
 {
     internal sealed class HttpPactPublisher : IPactPublisher
     {
-        private const string RequestHeader = "Pact-Requester";
-        private const string JsonContentType = "application/json";
+        private readonly PactBroker _pactBroker;
+        private readonly string _consumerVersion;
+        private readonly string _consumerVersionTag;
 
-        private readonly string _url;
-        private readonly HttpMethod _method;
-        private readonly string _apiKey;
-
-        public HttpPactPublisher(string url, HttpMethod method, string apiKey)
+        public HttpPactPublisher(string pactBrokerUri, string consumerVersion, string apiKey, string consumerVersionTag)
         {
-            _url = url;
-            _method = method;
-            _apiKey = apiKey;
+            _pactBroker = new PactBroker(pactBrokerUri, apiKey);
+            _consumerVersion = consumerVersion;
+            _consumerVersionTag = consumerVersionTag;
         }
 
         public async Task PublishAsync(PactDefinition definition)
         {
-            var json = JsonConvert.SerializeObject(definition, PactifySerialization.Settings);
+            await _pactBroker.PublishPact(definition, _consumerVersion);
 
-            var request = new HttpRequestMessage
+            if (_consumerVersionTag != null)
             {
-                RequestUri = new Uri(_url),
-                Content = new StringContent(json, Encoding.UTF8, JsonContentType),
-                Method = _method
-            };
-
-            if (!(_apiKey is null))
-            {
-                request.Headers.Add(RequestHeader,_apiKey);
+                await _pactBroker.TagPacticipantVersion(definition.Consumer.Name, _consumerVersion, _consumerVersionTag);
             }
-
-            await new HttpClient().SendAsync(request);
         }
     }
 }

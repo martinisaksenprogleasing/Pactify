@@ -9,7 +9,7 @@ namespace Pactify
         IPactMaker Between(string consumer, string provider);
         IPactMaker WithHttpInteraction(Action<IHttpInteractionBuilder> buildCoupling);
         IPactMaker PublishedAsFile(string localPath);
-        IPactMaker PublishedViaHttp(string url, HttpMethod method, string apiKey = null);
+        IPactMaker PublishedViaHttp(string pactBrokerUri, string consumerVersion, string apiKey = null, string consumerVersionTag = null);
         void Make();
         Task MakeAsync();
     }

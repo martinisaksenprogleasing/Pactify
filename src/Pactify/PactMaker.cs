@@ -1,7 +1,6 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Serialization;
 using Pactify.Builders;
 using Pactify.Builders.Http;
 using Pactify.Definitions;
@@ -62,9 +61,9 @@ namespace Pactify
             return this;
         }
 
-        public IPactMaker PublishedViaHttp(string url, HttpMethod method, string apiKey = null)
+        public IPactMaker PublishedViaHttp(string pactBrokerUri, string consumerVersion, string apiKey = null, string consumerVersionTag = null)
         {
-            _publisher = new HttpPactPublisher(url, method, apiKey);
+            _publisher = new HttpPactPublisher(pactBrokerUri, consumerVersion, apiKey, consumerVersionTag);
             return this;
         }
 

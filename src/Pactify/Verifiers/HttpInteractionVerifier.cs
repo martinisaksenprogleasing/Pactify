@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Pactify.Definitions;
 using Pactify.Definitions.Http;
 using Pactify.Messages;
 using SmartFormat;
@@ -33,6 +32,7 @@ namespace Pactify.Verifiers
             var providedBody = JsonConvert.DeserializeObject<ExpandoObject>(json);
             var expectedBody = definition.Response.Body;
             var errors = new List<string>();
+            var messageHeader = $"The following errors were encountered when verifying {requestPath}";
 
             VerifyStatusCode(definition, httpResponse, errors);
             VerifyHeaders(definition, httpResponse, errors);
@@ -43,6 +43,12 @@ namespace Pactify.Verifiers
             }
 
             VerifyBody(options, expectedBody, providedBody, errors);
+
+            if (errors.Count > 0)
+            {
+                errors.Insert(0,messageHeader);
+            }
+
             return new PactVerificationResult(errors);
         }
 
