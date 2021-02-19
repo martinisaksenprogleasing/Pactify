@@ -7,8 +7,8 @@ namespace Pactify
         IPactVerifier Between(string consumer, string provider);
         IPactVerifier UseEndpointTemplate(object templateObject);
         IPactVerifier RetrievedFromFile(string localPath);
-        IPactVerifier RetrievedViaHttp(string url, string apiKey = null);
-        IPactVerifier PublishPactResultsToPactBroker(string providerVersion, string providerVersionTag, string buildUrl, string apiKey = null);
+        IPactVerifier RetrievedViaHttp(string pactBrokerUri, string consumerVersion, string apiKey = null);
+        IPactVerifier PublishPactResultsToPactBroker(string providerVersion, string providerVersionTag, string buildUrl);
         Task VerifyAsync();
         void Verify();
     }

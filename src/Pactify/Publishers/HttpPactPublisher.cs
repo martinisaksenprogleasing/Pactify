@@ -1,10 +1,6 @@
-using System;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 using Pactify.Definitions;
-using Pactify.Serialization;
 
 namespace Pactify.Publishers
 {
@@ -14,9 +10,9 @@ namespace Pactify.Publishers
         private readonly string _consumerVersion;
         private readonly string _consumerVersionTag;
 
-        public HttpPactPublisher(string pactBrokerUri, string consumerVersion, string apiKey, string consumerVersionTag)
+        public HttpPactPublisher(PactBroker pactBroker, string consumerVersion, string consumerVersionTag)
         {
-            _pactBroker = new PactBroker(pactBrokerUri, apiKey);
+            _pactBroker = pactBroker;
             _consumerVersion = consumerVersion;
             _consumerVersionTag = consumerVersionTag;
         }

@@ -18,7 +18,7 @@ namespace Pactify.UnitTests
 
             await PactMaker
                 .Create(options)
-                .Between("Customer", "Lease")
+                .Between("ServiceA", "ServiceB")
                 .WithHttpInteraction(cb => cb
                     .Given("There is a parcel with some id")
                     .UponReceiving("A GET Request to retrieve the parcel")
@@ -28,7 +28,15 @@ namespace Pactify.UnitTests
                     .WillRespondWith(response => response
                         .WithStatusCode(HttpStatusCode.OK)
                         .WithBody<ParcelReadModel>()))
-                .PublishedViaHttp("http://localhost:9292/","1.7", consumerVersionTag: "master")
+                .WithHttpInteraction(cb => cb
+                    .Given("There is not a parcel with some id")
+                    .UponReceiving("A GET Request to retrieve the parcel")
+                    .With(request => request
+                        .WithMethod(HttpMethod.Get)
+                        .WithPath("api/parcels/{Id}"))
+                    .WillRespondWith(response => response
+                        .WithStatusCode(HttpStatusCode.NotFound)))
+                .PublishedViaHttp("http://localhost:9292/","1.7", consumerVersionTag: "SA-100")
                 .MakeAsync();
         }
 
@@ -38,9 +46,9 @@ namespace Pactify.UnitTests
             await PactVerifier
                 .CreateFor<Startup>()
                 .UseEndpointTemplate(new ParcelReadModel())
-                .Between("Customer", "Lease")
-                .RetrievedViaHttp("http://localhost:9292/pacts/provider/Lease/consumer/Customer/version/1.2")
-                .PublishPactResultsToPactBroker("1.0.0", "DEVX-1235", "test")
+                .Between("ServiceA", "ServiceB")
+                .RetrievedViaHttp("http://localhost:9292/", "1.7")
+                .PublishPactResultsToPactBroker("1.0.0", "SB-100", "test")
                 .VerifyAsync();
         }
     }

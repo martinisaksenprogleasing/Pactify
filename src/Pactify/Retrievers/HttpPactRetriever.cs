@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Pactify.Definitions;
@@ -7,27 +6,18 @@ namespace Pactify.Retrievers
 {
     internal sealed class HttpPactRetriever : IPactRetriever
     {
-        private const string RequestHeader = "Pact-Requester";
+        private readonly PactBroker _pactBroker;
+        private readonly string _version;
 
-        private readonly string _url;
-        private readonly string _apiKey;
-
-        public HttpPactRetriever(string url, string apiKey)
+        public HttpPactRetriever(PactBroker pactBroker, string version)
         {
-            _url = url;
-            _apiKey = apiKey;
+            _pactBroker = pactBroker;
+            _version = version;
         }
 
         public async Task<PactDefinition> RetrieveAsync()
         {
-            var httpClient = new HttpClient();
-
-            if (!(_apiKey is null))
-            {
-                httpClient.DefaultRequestHeaders.Add(RequestHeader,_apiKey);
-            }
-
-            var response = await httpClient.GetAsync(_url);
+            var response = await _pactBroker.GetPact(_version);
             var json = await response.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<PactDefinition>(json);

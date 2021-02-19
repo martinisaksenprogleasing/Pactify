@@ -99,9 +99,10 @@ namespace Pactify.Verifiers
                 var propertyName = pair.Key;
                 var propertyValue = pair.Value;
 
-                var providedProperty = providedBody.FirstOrDefault(p => p.Key.Equals(propertyName, stringComparision)).Value;
+                var providedProperty = providedBody.FirstOrDefault(p => p.Key.Equals(propertyName, stringComparision));
+                var providedPropertyValue = providedProperty.Value;
 
-                if (providedProperty is null)
+                if (providedProperty.Key is null)
                 {
                     var message = GetErrorMessage(ErrorMessages.MissingResponseBodyProperty, propertyName);
                     errors.Add(message);
@@ -113,12 +114,12 @@ namespace Pactify.Verifiers
                         continue;
                     }
 
-                    var propertyHasExpectedValue = providedProperty.Equals(propertyValue);
+                    var propertyHasExpectedValue = providedPropertyValue.Equals(propertyValue);
 
                     if (!propertyHasExpectedValue)
                     {
                         var message = GetErrorMessage(ErrorMessages.IncorrectReposnseBodyPropertyValue,
-                            propertyValue, providedProperty);
+                            propertyValue, providedPropertyValue);
                         errors.Add(message);
                     }
                 }

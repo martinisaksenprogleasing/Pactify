@@ -1,6 +1,6 @@
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Pactify.Builders;
 using Pactify.Builders.Http;
 using Pactify.Definitions;
@@ -13,18 +13,23 @@ namespace Pactify
     public class PactMaker : IPactMaker
     {
         private readonly PactDefinition _pactDefinition;
+        private readonly ILogger _logger;
         private IPactPublisher _publisher;
+        private string _provider;
+        private string _consumer;
+        private PactBroker _pactBroker;
 
-        private PactMaker(PactDefinitionOptions options)
+        private PactMaker(PactDefinitionOptions options, ILogger logger = null)
         {
             _pactDefinition = new PactDefinition
             {
                 Options = options
             };
+            _logger = logger;
         }
 
-        public static IPactMaker Create(PactDefinitionOptions options = null)
-            => new PactMaker(options ?? new PactDefinitionOptions());
+        public static IPactMaker Create(PactDefinitionOptions options = null, ILogger logger = null)
+            => new PactMaker(options ?? new PactDefinitionOptions(), logger);
 
         public IPactMaker Between(string consumer, string provider)
         {
@@ -35,6 +40,10 @@ namespace Pactify
 
             _pactDefinition.Consumer = new ConsumerDefinition { Name = consumer };
             _pactDefinition.Provider = new ProviderDefinition { Name = provider };
+
+            _provider = provider;
+            _consumer = consumer;
+
             return this;
         }
 
@@ -63,7 +72,12 @@ namespace Pactify
 
         public IPactMaker PublishedViaHttp(string pactBrokerUri, string consumerVersion, string apiKey = null, string consumerVersionTag = null)
         {
-            _publisher = new HttpPactPublisher(pactBrokerUri, consumerVersion, apiKey, consumerVersionTag);
+            _pactBroker = new PactBroker(pactBrokerUri, apiKey, _logger)
+            {
+                Consumer = _consumer,
+                Provider = _provider
+            };
+            _publisher = new HttpPactPublisher(_pactBroker, consumerVersion, consumerVersionTag);
             return this;
         }
 
