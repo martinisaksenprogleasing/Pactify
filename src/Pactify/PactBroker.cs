@@ -11,7 +11,7 @@ namespace Pactify
 {
     internal class PactBroker
     {
-        private const string RequestHeader = "Pact-Requester";
+        private const string RequestHeader = "Authorization";
         private const string JsonContentType = "application/json";
 
         private readonly HttpClient _pactBrokerHttpClient = new HttpClient();
@@ -31,7 +31,7 @@ namespace Pactify
 
             if (!(apiKey is null))
             {
-                _pactBrokerHttpClient.DefaultRequestHeaders.Add(RequestHeader, apiKey);
+                _pactBrokerHttpClient.DefaultRequestHeaders.Add(RequestHeader, $"Bearer {apiKey}");
             }
 
             _logger = logger;

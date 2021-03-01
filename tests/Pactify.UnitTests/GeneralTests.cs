@@ -45,10 +45,11 @@ namespace Pactify.UnitTests
         {
             await PactVerifier
                 .CreateFor<Startup>()
+                .ConfigurePactBroker("http://localhost:9292/")
                 .UseEndpointTemplate(new ParcelReadModel())
                 .Between("ServiceA", "ServiceB")
-                .RetrievedViaHttp("http://localhost:9292/", "1.7")
-                .PublishPactResultsToPactBroker("1.0.0", "SB-100", "test")
+                .RetrievedViaHttp("1.7")
+                .PublishPactResults(true, "1.0.0", "SB-100", "test")
                 .VerifyAsync();
         }
     }

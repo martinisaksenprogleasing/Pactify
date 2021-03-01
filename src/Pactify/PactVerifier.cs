@@ -46,6 +46,13 @@ namespace Pactify
             return this;
         }
 
+        public IPactVerifier ConfigurePactBroker(string pactBrokerUri, string apiKey = null)
+        {
+            _pactBroker = new PactBroker(pactBrokerUri, apiKey) { Provider = _provider, Consumer = _consumer };
+
+            return this;
+        }
+
         public IPactVerifier UseEndpointTemplate(object templateObject)
         {
             _pathTemplateObject = templateObject;
@@ -63,21 +70,18 @@ namespace Pactify
             return this;
         }
 
-        public IPactVerifier RetrievedViaHttp(string pactBrokerUri, string consumerVersion, string apiKey = null)
+        public IPactVerifier RetrievedViaHttp(string consumerVersion)
         {
-            _pactBroker = new PactBroker(pactBrokerUri, apiKey) { Provider = _provider, Consumer = _consumer };
+            if (_pactBroker == null) throw new PactifyException($"You must call {nameof(ConfigurePactBroker)} first before using {nameof(RetrievedViaHttp)}.");
             _retriever = new HttpPactRetriever(_pactBroker, consumerVersion);
             return this;
         }
 
-        public IPactVerifier PublishPactResultsToPactBroker(string providerVersion, string providerVersionTag, string buildUrl)
+        public IPactVerifier PublishPactResults(bool isCi, string providerVersion, string providerVersionTag, string buildUrl)
         {
-            if (_pactBroker == null)
-            {
-                throw new PactifyException($"You must call {nameof(RetrievedViaHttp)} first before using {nameof(PublishPactResultsToPactBroker)}.");
-            }
+            if (_retriever == null && _pactBroker == null) throw new PactifyException($"You must call {nameof(RetrievedViaHttp)} first before using {nameof(PublishPactResults)}.");
 
-            _publishResults = true;
+            _publishResults = isCi;
             _providerVersion = providerVersion;
             _providerVersionTag = providerVersionTag;
             _buildUrl = buildUrl;
